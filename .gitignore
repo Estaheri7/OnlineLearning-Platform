@@ -7,7 +7,6 @@ venv/
 # Python compiled files
 *.pyc
 __pycache__/
-migrations/
 
 # Database
 *.sqlite3
