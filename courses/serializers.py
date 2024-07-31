@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from .models import Category, Course, Module, Lession, Assignment, Submission
 from users.serializers import CustomUserSerializer
+from users.models import CustomUser
 
 
 
@@ -11,16 +12,49 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ('id', 'parent', 'title', 'avatar', 'created_time', 'updated_time')
 
 
+class CategoryDetailSerializer(serializers.ModelSerializer):
+    parent = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Category
+        fields = ('id', 'parent', 'title', 'avatar', 'created_time', 'updated_time')
+
+    def get_parent(self, obj):
+        if obj.parent:
+            return CategoryDetailSerializer(obj.parent).data
+        return None
+
+
 class CourseSerializer(serializers.ModelSerializer):
-    category = CategorySerializer()
-    instructor = CustomUserSerializer()
-    students = CustomUserSerializer()
+    category = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all(),
+        many=True
+    )
 
     class Meta:
         model = Course
-        fields = ('id', 'category', 'title', 'description', 'avatar', 'instructor', 'students', 'created_time',
-                  'updated_time')
+        fields = ('id', 'category', 'title', 'description', 'avatar', 'instructor', 'students')
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        user = request.user
+        if user.is_student:
+            raise serializers.ValidationError({"instructor": "User is not an authorized instructor."})
         
+        if 'instructor' not in validated_data:
+            validated_data['instructor'] = user
+        return super().create(validated_data)
+    
+
+class CourseDetailSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(many=True)
+    instructor = CustomUserSerializer()
+    students = CustomUserSerializer(many=True)
+
+    class Meta:
+        model = Course
+        fields = ('id', 'category', 'title', 'description', 'avatar', 'instructor', 'students', 'created_time', 'updated_time')
+
 
 class ModuleSerializer(serializers.ModelSerializer):
     course = CourseSerializer()

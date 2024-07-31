@@ -19,8 +19,8 @@ class Course(models.Model):
     title = models.CharField(max_length=200, blank=False, null=False)
     description = models.TextField(blank=True, null=True)
     avatar = models.ImageField(blank=True, null=True)
-    instructor = models.ForeignKey('users.CustomUser', related_name='instructed_courses', on_delete=models.CASCADE)
-    students = models.ManyToManyField('users.CustomUser', related_name='enrolled_courses', blank=True)
+    instructor = models.ForeignKey('users.CustomUser', related_name='instructed_courses', on_delete=models.CASCADE, blank=True, null=True)
+    students = models.ManyToManyField('users.CustomUser', related_name='enrolled_courses', blank=True, null=True)
     created_time = models.DateTimeField(auto_now_add=True)
     updated_time = models.DateTimeField(auto_now=True)
 
