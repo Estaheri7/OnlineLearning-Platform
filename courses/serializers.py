@@ -84,8 +84,17 @@ class AssignmentSerializer(serializers.ModelSerializer):
     
 
 class SubmissionSerializer(serializers.ModelSerializer):
-    assignment = AssignmentSerializer()
 
     class Meta:
         model = Submission
         fields = ('id', 'student', 'assignment', 'content', 'submitted_at')
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        user = request.user
+
+        if 'student' not in validated_data:
+            validated_data['student'] = user
+        
+        return super().create(validated_data)
+        

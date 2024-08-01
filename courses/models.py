@@ -89,7 +89,7 @@ def get_upload_to_assignments(instance, filename):
 
 
 class Submission(models.Model):
-    student = models.ForeignKey('users.CustomUser', blank=False, null=False, related_name='submissions', on_delete=models.CASCADE)
+    student = models.ForeignKey('users.CustomUser', blank=True, null=True, related_name='submissions', on_delete=models.CASCADE)
     assignment = models.ForeignKey(Assignment, blank=False, null=False, on_delete=models.CASCADE)
     content = models.FileField(blank=True, null=True, upload_to=get_upload_to_assignments)
     submitted_at = models.DateTimeField(auto_now_add=True)

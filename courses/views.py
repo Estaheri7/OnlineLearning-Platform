@@ -220,3 +220,47 @@ class AssignmentDetailView(APIView):
             return Response(serializer.errros, status=status.HTTP_400_BAD_REQUEST)
         except Assignment.DoesNotExist:
             return Response({'detail': 'Assignment not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+
+class SubmissionListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            assignment_pk = request.query_params.get('assignment', -1)
+            assignment = Assignment.objects.get(pk=assignment_pk)
+            submission = Submission.objects.filter(assignment=assignment)
+            serializer = SubmissionSerializer(submission, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Assignment.DoesNotExist:
+            return Response({'detail': 'Assignment not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+    def post(self, request):
+        serializer = SubmissionSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class SubmissionDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        try:
+            submission = Submission.objects.get(pk=pk)
+            serializer = SubmissionSerializer(submission)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Submission.DoesNotExist:
+            return Response({'detail': 'Submission not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+    def put(self, request, pk):
+        try:
+            submission = Submission.objects.get(pk=pk)
+            serializer = SubmissionSerializer(submission, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Submission.DoesNotExist:
+            return Response({'detail': 'Submission not found'}, status=status.HTTP_404_NOT_FOUND)

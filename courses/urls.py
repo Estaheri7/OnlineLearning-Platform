@@ -8,7 +8,7 @@ from .views import (
     ModuleListView, ModuleDetailView,
     LessionListView, LessionDetailView,
     AssignmentListView, AssignmentDetailView,
-
+    SubmissionListView, SubmissionDetailView
 )
 
 
@@ -26,7 +26,10 @@ urlpatterns = [
     path('lessions/<int:pk>/', LessionDetailView.as_view(), name='lession-detail'),
     
     path('assignments/', AssignmentListView.as_view(), name='assignment-for-module'),
-    path('assignments/<int:pk>/', AssignmentDetailView.as_view(), name='assignment-detail')
+    path('assignments/<int:pk>/', AssignmentDetailView.as_view(), name='assignment-detail'),
+
+    path('submissions/', SubmissionListView.as_view(), name='submission-for-assignment'),
+    path('submissions/<int:pk>/', SubmissionDetailView.as_view(), name='submission-detail'),
 ]
 
 if settings.DEBUG:
