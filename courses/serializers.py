@@ -77,25 +77,15 @@ class LessionSerializer(serializers.ModelSerializer):
     
 
 class AssignmentSerializer(serializers.ModelSerializer):
-    module = ModuleSerializer()
-    content_type = serializers.SerializerMethodField()
 
     class Meta:
         model = Assignment
-        fields = ('id', 'module', 'title', 'content', 'content_type', 'created_time', 'updated_time', 'due_time')
-
-    def get_file_type(self, obj):
-        return obj.get_file_type_display()
+        fields = ('id', 'module', 'title', 'content', 'created_time', 'updated_time', 'due_time')
     
 
 class SubmissionSerializer(serializers.ModelSerializer):
-    student = CustomUserSerializer()
     assignment = AssignmentSerializer()
-    content_type = serializers.SerializerMethodField()
 
     class Meta:
         model = Submission
-        fields = ('id', 'student', 'assignment', 'content', 'content_type', 'submitted_at')
-
-    def get_file_type(self, obj):
-        return obj.get_file_type_display()
+        fields = ('id', 'student', 'assignment', 'content', 'submitted_at')

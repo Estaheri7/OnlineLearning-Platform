@@ -101,7 +101,7 @@ class ModuleListView(APIView):
             serializer = ModuleSerializer(modules, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Course.DoesNotExist:
-            return Response({'detail': 'Module not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'detail': 'Course not found'}, status=status.HTTP_404_NOT_FOUND)
         
     def post(self, request):
         serializer = ModuleSerializer(data=request.data)
@@ -133,5 +133,67 @@ class ModuleDetailView(APIView):
         except Module.DoesNotExist:
             return Response({'detail': 'Module not found'}, status=status.HTTP_404_NOT_FOUND)
 
-            
+
+class LessionListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            module_pk = request.query_params.get('module', -1)
+            module = Module.objects.get(pk=module_pk)
+            lessions = Lession.objects.filter(module=module)
+            serializer = LessionSerializer(lessions, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Module.DoesNotExist:
+            return Response({'detail': 'Module not found'}, status=status.HTTP_404_NOT_FOUND)
         
+    def post(self, request):
+        serializer = LessionSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class LessionDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        try:
+            lession = Lession.objects.get(pk=pk)
+            serializer = LessionSerializer(lession)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Lession.DoesNotExist:
+            return Response({'detail': 'Lession not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+    def put(self, request, pk):
+        try:
+            lession = Lession.objects.get(pk=pk)
+            serializer = LessionSerializer(lession, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errros, status=status.HTTP_400_BAD_REQUEST)
+        except Lession.DoesNotExist:
+            return Response({'detail': 'Lession not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        
+class AssignmentListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            module_pk = request.query_params.get('module', -1)
+            module = Module.objects.get(pk=module_pk)
+            assignments = Assignment.objects.filter(module=module)
+            serializer = AssignmentSerializer(assignments, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Module.DoesNotExist:
+            return Response({'detail': 'Module not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+    def post(self, request):
+        serializer = AssignmentSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

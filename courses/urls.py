@@ -6,7 +6,7 @@ from .views import (
     CategoryListView, CategoryDetailView,
     CourseListView,  CourseDetailView,
     ModuleListView, ModuleDetailView,
-
+    LessionListView, LessionDetailView,
 
 )
 
@@ -14,10 +14,16 @@ from .views import (
 urlpatterns = [
     path('categories/', CategoryListView.as_view(), name='category-list'),
     path('categories/<int:pk>/', CategoryDetailView.as_view(), name='category-detail'),
+
     path('courses/', CourseListView.as_view(), name='course-list'),
     path('courses/<int:pk>/', CourseDetailView.as_view(), name='course-detail'),
+
     path('modules/', ModuleListView.as_view(), name='module-for-course'),
     path('modules/<int:pk>/', ModuleDetailView.as_view(), name='moudle-detail'),
+
+    path('lessions/', LessionListView.as_view(), name='lessions-for-module'),
+    path('lessions/<int:pk>/', LessionDetailView.as_view(), name='lession-detail'),
+    
 ]
 
 if settings.DEBUG:
