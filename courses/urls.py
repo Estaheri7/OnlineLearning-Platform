@@ -7,6 +7,7 @@ from .views import (
     CourseListView,  CourseDetailView,
     ModuleListView, ModuleDetailView,
     LessionListView, LessionDetailView,
+    AssignmentListView, AssignmentDetailView,
 
 )
 
@@ -24,6 +25,8 @@ urlpatterns = [
     path('lessions/', LessionListView.as_view(), name='lessions-for-module'),
     path('lessions/<int:pk>/', LessionDetailView.as_view(), name='lession-detail'),
     
+    path('assignments/', AssignmentListView.as_view(), name='assignment-for-module'),
+    path('assignments/<int:pk>/', AssignmentDetailView.as_view(), name='assignment-detail')
 ]
 
 if settings.DEBUG:

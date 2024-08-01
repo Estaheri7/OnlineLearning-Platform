@@ -197,3 +197,26 @@ class AssignmentListView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AssignmentDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        try:
+            assignment = Assignment.objects.get(pk=pk)
+            serializer = AssignmentSerializer(assignment)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Assignment.DoesNotExist:
+            return Response({'detail': 'Assignment not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+    def put(self, request, pk):
+        try:
+            assignment = Assignment.objects.get(pk=pk)
+            serializer = AssignmentSerializer(assignment, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errros, status=status.HTTP_400_BAD_REQUEST)
+        except Assignment.DoesNotExist:
+            return Response({'detail': 'Assignment not found'}, status=status.HTTP_404_NOT_FOUND)
