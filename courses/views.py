@@ -89,3 +89,49 @@ class CourseDetailView(APIView):
         except Course.DoesNotExist:
             return Response({'detail': 'Course not found'}, status=status.HTTP_404_NOT_FOUND)
         
+
+class ModuleListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            course_pk = request.query_params.get('course', -1) # by queryparams course=id
+            course = Course.objects.get(pk=course_pk)
+            modules = Module.objects.filter(course=course)
+            serializer = ModuleSerializer(modules, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Course.DoesNotExist:
+            return Response({'detail': 'Module not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+    def post(self, request):
+        serializer = ModuleSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class ModuleDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        try:
+            module = Module.objects.get(pk=pk)
+            serializer = ModuleSerializer(module)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Module.DoesNotExist:
+            return Response({'detail': 'Module not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+    def put(self, request, pk):
+        try:
+            module = Module.objects.get(pk=pk)
+            serializer = ModuleSerializer(module, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Module.DoesNotExist:
+            return Response({'detail': 'Module not found'}, status=status.HTTP_404_NOT_FOUND)
+
+            
+        

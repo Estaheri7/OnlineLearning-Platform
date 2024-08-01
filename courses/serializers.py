@@ -33,7 +33,7 @@ class CourseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Course
-        fields = ('id', 'category', 'title', 'description', 'avatar', 'instructor', 'students')
+        fields = ('id', 'category', 'title', 'description', 'avatar', 'instructor', 'students', 'price')
 
     def create(self, validated_data):
         request = self.context.get('request')
@@ -53,27 +53,27 @@ class CourseDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Course
-        fields = ('id', 'category', 'title', 'description', 'avatar', 'instructor', 'students', 'created_time', 'updated_time')
+        fields = ('id', 'category', 'title', 'description', 'avatar', 'instructor', 'students', 'price', 'created_time', 'updated_time')
 
 
 class ModuleSerializer(serializers.ModelSerializer):
-    course = CourseSerializer()
+    lessions = serializers.SerializerMethodField()
 
     class Meta:
         model = Module
-        fields = ('id', 'course', 'title', 'created_time', 'updated_time')
+        fields = ('id', 'course', 'title', 'lessions', 'created_time', 'updated_time')
+
+    def get_lessions(self, obj):
+        serializer = LessionSerializer(obj.lessions.all(), many=True)
+        data = serializer.data
+        return [id_['id'] for id_ in data]
 
 
 class LessionSerializer(serializers.ModelSerializer):
-    module = ModuleSerializer()
-    content_type = serializers.SerializerMethodField()
 
     class Meta:
         model = Lession
-        fields = ('id', 'module', 'title', 'content', 'content_type', 'created_time', 'updated_time')
-
-    def get_file_type(self, obj):
-        return obj.get_file_type_display()
+        fields = ('id', 'module', 'title', 'content', 'created_time', 'updated_time')
     
 
 class AssignmentSerializer(serializers.ModelSerializer):
