@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 
 from .models import Category, Course, Module, Lession, Assignment, Submission
 from users.serializers import CustomUserSerializer
@@ -44,7 +45,15 @@ class CourseSerializer(serializers.ModelSerializer):
         if 'instructor' not in validated_data:
             validated_data['instructor'] = user
         return super().create(validated_data)
-    
+
+    def update(self, instance, validated_data):
+        request = self.context.get('request')
+        user = request.user
+        instructor = instance.instructor
+
+        if (user.is_student) or (user.username != instructor.username):
+            raise PermissionDenied('You do not have permission to update this submission.')
+        return super().update(instance, validated_data)
 
 class CourseDetailSerializer(serializers.ModelSerializer):
     category = CategorySerializer(many=True)
@@ -67,6 +76,16 @@ class ModuleSerializer(serializers.ModelSerializer):
         serializer = LessionSerializer(obj.lessions.all(), many=True)
         data = serializer.data
         return [id_['id'] for id_ in data]
+    
+    def update(self, instance, validated_data):
+        request = self.context.get('request')
+        user = request.user
+        course = instance.course
+        instructor = course.instructor
+
+        if (user.is_student) or (user.username != instructor.username):
+            raise PermissionDenied('You do not have permission to update this submission.')
+        return super().update(instance, validated_data)
 
 
 class LessionSerializer(serializers.ModelSerializer):
@@ -74,6 +93,17 @@ class LessionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lession
         fields = ('id', 'module', 'title', 'content', 'created_time', 'updated_time')
+
+    def update(self, instance, validated_data):
+        request = self.context.get('request')
+        user = request.user
+        module = instance.module
+        course = module.course
+        instructor = course.instructor
+
+        if (user.is_student) or (user.username != instructor.username):
+            raise PermissionDenied('You do not have permission to update this submission.')
+        return super().update(instance, validated_data)
     
 
 class AssignmentSerializer(serializers.ModelSerializer):
@@ -81,6 +111,18 @@ class AssignmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Assignment
         fields = ('id', 'module', 'title', 'content', 'created_time', 'updated_time', 'due_time')
+
+    def update(self, instance, validated_data):
+        request = self.context.get('request')
+        user = request.user
+        module = instance.module
+        course = module.course
+        instructor = course.instructor
+
+        if (user.is_student) or (user.username != instructor.username):
+            raise PermissionDenied('You do not have permission to update this submission.')
+        return super().update(instance, validated_data)
+
     
 
 class SubmissionSerializer(serializers.ModelSerializer):
@@ -97,4 +139,14 @@ class SubmissionSerializer(serializers.ModelSerializer):
             validated_data['student'] = user
         
         return super().create(validated_data)
+    
+    def update(self, instance, validated_data):
+        request = self.context.get('request')
+        user = request.user
+        student = instance.student
+
+        if (student.username != user.username):
+            raise PermissionDenied("You do not have permission to update this submission.")
+        
+        return super().update(instance, validated_data)
         

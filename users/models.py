@@ -9,11 +9,7 @@ class CustomUser(AbstractUser):
     
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
-
-    def __str__(self):
-        return self.username
     
-
 
 class UserProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)

@@ -1,6 +1,7 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 
 from .serializers import (
@@ -14,253 +15,113 @@ from .models import (
 )
 
 
-class CategoryListView(APIView):
+class CategoryListView(generics.ListCreateAPIView):
+    queryset = Category.objects.all()
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        categories = Category.objects.all()
-        serializer = CategoryDetailSerializer(categories, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    
-    def post(self, request):
-        serializer = CategorySerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return CategorySerializer
+        return CategoryDetailSerializer
 
-class CategoryDetailView(APIView):
+
+class CategoryDetailView(generics.RetrieveUpdateAPIView):
+    queryset = Category.objects.all()
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, pk):
-        try:
-            category = Category.objects.get(pk=pk)
-            serializer = CategoryDetailSerializer(category)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Category.DoesNotExist:
-            return Response({'detail': 'Category not found'}, status=status.HTTP_404_NOT_FOUND)
-    
-    def put(self, request, pk):
-        try:
-            category = Category.objects.get(pk=pk)
-            serializer = CategorySerializer(category, request.data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Category.DoesNotExist:
-            return Response({'detail': 'Category not found'}, status=status.HTTP_404_NOT_FOUND)
+    def get_serializer_class(self):
+        if self.request.method in ['PUT', 'PATCH']:
+            return CategorySerializer
+        return CategoryDetailSerializer
 
-class CourseListView(APIView):
+
+class CourseListView(generics.ListCreateAPIView):
+    queryset = Course.objects.all()
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        courses = Course.objects.all()
-        serializer = CourseDetailSerializer(courses, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    
-    def post(self, request):
-        serializer = CourseSerializer(data=request.data, context={'request': request})
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return CourseSerializer
+        return CourseDetailSerializer
 
-class CourseDetailView(APIView):
+
+class CourseDetailView(generics.RetrieveUpdateAPIView):
+    queryset = Course.objects.all()
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, pk):
-        try:
-            course = Course.objects.get(pk=pk)
-            serializer = CourseDetailSerializer(course)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Course.DoesNotExist:
-            return Response({'detail': 'Course not found'}, status=status.HTTP_404_NOT_FOUND)
-        
-    def put(self, request, pk):
-        try:
-            course = Course.objects.get(pk=pk)
-            serializer = CourseSerializer(course, request.data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Course.DoesNotExist:
-            return Response({'detail': 'Course not found'}, status=status.HTTP_404_NOT_FOUND)
+    def get_serializer_class(self):
+        if self.request.method in ['PUT', 'PATCH']:
+            return CourseSerializer
+        return CourseDetailSerializer
         
 
-class ModuleListView(APIView):
+class ModuleListView(generics.ListCreateAPIView):
+    serializer_class = ModuleSerializer
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        try:
-            course_pk = request.query_params.get('course', -1) # by queryparams course=id
+    def get_queryset(self):
+        course_pk = self.request.query_params.get('course', None)
+        if course_pk is not None:
             course = Course.objects.get(pk=course_pk)
-            modules = Module.objects.filter(course=course)
-            serializer = ModuleSerializer(modules, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Course.DoesNotExist:
-            return Response({'detail': 'Course not found'}, status=status.HTTP_404_NOT_FOUND)
-        
-    def post(self, request):
-        serializer = ModuleSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+            return Module.objects.filter(course=course)
+        return Module.objects.none()
 
-class ModuleDetailView(APIView):
+
+class ModuleDetailView(generics.RetrieveUpdateAPIView):
+    queryset = Module.objects.all()
+    serializer_class = ModuleSerializer
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, pk):
-        try:
-            module = Module.objects.get(pk=pk)
-            serializer = ModuleSerializer(module)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Module.DoesNotExist:
-            return Response({'detail': 'Module not found'}, status=status.HTTP_404_NOT_FOUND)
-        
-    def put(self, request, pk):
-        try:
-            module = Module.objects.get(pk=pk)
-            serializer = ModuleSerializer(module, data=request.data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Module.DoesNotExist:
-            return Response({'detail': 'Module not found'}, status=status.HTTP_404_NOT_FOUND)
 
-
-class LessionListView(APIView):
+class LessionListView(generics.ListCreateAPIView):
+    serializer_class = LessionSerializer
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        try:
-            module_pk = request.query_params.get('module', -1)
+    def get_queryset(self):
+        module_pk = self.request.query_params.get('module', None)
+        if module_pk is not None:
             module = Module.objects.get(pk=module_pk)
-            lessions = Lession.objects.filter(module=module)
-            serializer = LessionSerializer(lessions, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Module.DoesNotExist:
-            return Response({'detail': 'Module not found'}, status=status.HTTP_404_NOT_FOUND)
-        
-    def post(self, request):
-        serializer = LessionSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+            return Lession.objects.filter(module=module)
+        return Lession.objects.none()
 
-class LessionDetailView(APIView):
+
+class LessionDetailView(generics.RetrieveUpdateAPIView):
+    queryset = Lession.objects.all()
+    serializer_class = LessionSerializer
+    permission_classes = [IsAuthenticated]
+        
+        
+class AssignmentListView(generics.ListCreateAPIView):
+    serializer_class = AssignmentSerializer
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, pk):
-        try:
-            lession = Lession.objects.get(pk=pk)
-            serializer = LessionSerializer(lession)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Lession.DoesNotExist:
-            return Response({'detail': 'Lession not found'}, status=status.HTTP_404_NOT_FOUND)
-        
-    def put(self, request, pk):
-        try:
-            lession = Lession.objects.get(pk=pk)
-            serializer = LessionSerializer(lession, data=request.data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errros, status=status.HTTP_400_BAD_REQUEST)
-        except Lession.DoesNotExist:
-            return Response({'detail': 'Lession not found'}, status=status.HTTP_404_NOT_FOUND)
-        
-        
-class AssignmentListView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        try:
-            module_pk = request.query_params.get('module', -1)
+    def get_queryset(self):
+        module_pk = self.request.query_params.get('module', None)
+        if module_pk is not None:
             module = Module.objects.get(pk=module_pk)
-            assignments = Assignment.objects.filter(module=module)
-            serializer = AssignmentSerializer(assignments, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Module.DoesNotExist:
-            return Response({'detail': 'Module not found'}, status=status.HTTP_404_NOT_FOUND)
-        
-    def post(self, request):
-        serializer = AssignmentSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Assignment.objects.filter(module=module)
+        return Assignment.objects.none()
 
 
-class AssignmentDetailView(APIView):
+class AssignmentDetailView(generics.RetrieveUpdateAPIView):
+    queryset = Assignment.objects.all()
+    serializer_class = AssignmentSerializer
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, pk):
-        try:
-            assignment = Assignment.objects.get(pk=pk)
-            serializer = AssignmentSerializer(assignment)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Assignment.DoesNotExist:
-            return Response({'detail': 'Assignment not found'}, status=status.HTTP_404_NOT_FOUND)
-        
-    def put(self, request, pk):
-        try:
-            assignment = Assignment.objects.get(pk=pk)
-            serializer = AssignmentSerializer(assignment, data=request.data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errros, status=status.HTTP_400_BAD_REQUEST)
-        except Assignment.DoesNotExist:
-            return Response({'detail': 'Assignment not found'}, status=status.HTTP_404_NOT_FOUND)
-        
 
-class SubmissionListView(APIView):
+class SubmissionListView(generics.ListCreateAPIView):
+    serializer_class = SubmissionSerializer
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        try:
-            assignment_pk = request.query_params.get('assignment', -1)
+    def get_queryset(self):
+        assignment_pk = self.request.query_params.get('assignment', None)
+        if assignment_pk is not None:
             assignment = Assignment.objects.get(pk=assignment_pk)
-            submission = Submission.objects.filter(assignment=assignment)
-            serializer = SubmissionSerializer(submission, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Assignment.DoesNotExist:
-            return Response({'detail': 'Assignment not found'}, status=status.HTTP_404_NOT_FOUND)
-        
-    def post(self, request):
-        serializer = SubmissionSerializer(data=request.data, context={'request': request})
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+            return Submission.objects.filter(assignment=assignment)
+        return Submission.objects.none()
 
-class SubmissionDetailView(APIView):
+
+class SubmissionDetailView(generics.RetrieveUpdateAPIView):
+    queryset = Submission.objects.all()
+    serializer_class = SubmissionSerializer
     permission_classes = [IsAuthenticated]
-
-    def get(self, request, pk):
-        try:
-            submission = Submission.objects.get(pk=pk)
-            serializer = SubmissionSerializer(submission)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Submission.DoesNotExist:
-            return Response({'detail': 'Submission not found'}, status=status.HTTP_404_NOT_FOUND)
-        
-    def put(self, request, pk):
-        try:
-            submission = Submission.objects.get(pk=pk)
-            serializer = SubmissionSerializer(submission, data=request.data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Submission.DoesNotExist:
-            return Response({'detail': 'Submission not found'}, status=status.HTTP_404_NOT_FOUND)
