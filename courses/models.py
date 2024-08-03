@@ -21,7 +21,6 @@ class Course(models.Model):
     avatar = models.ImageField(blank=True, null=True)
     instructor = models.ForeignKey('users.CustomUser', related_name='instructed_courses', on_delete=models.CASCADE, blank=True, null=True)
     students = models.ManyToManyField('users.CustomUser', related_name='enrolled_courses', blank=True, null=True)
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     created_time = models.DateTimeField(auto_now_add=True)
     updated_time = models.DateTimeField(auto_now=True)
 
@@ -98,3 +97,14 @@ class Submission(models.Model):
         db_table = 'submissions'
         verbose_name = 'submission'
         verbose_name_plural = 'submissions'
+
+
+class Enrollment(models.Model):
+    course = models.ForeignKey(Course, blank=False, null=False, related_name='course_enrollments', on_delete=models.CASCADE)
+    user = models.ForeignKey('users.CustomUser', blank=False, null=False, related_name='user_enrollments', on_delete=models.CASCADE)
+    enroll_time = models.DateField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'enrollments'
+        verbose_name = 'enrollment'
+        verbose_name_plural = 'enrollments'

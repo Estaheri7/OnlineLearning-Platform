@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 
-from .models import Category, Course, Module, Lession, Assignment, Submission
+from .models import Category, Course, Module, Lession, Assignment, Submission, Enrollment
 from users.serializers import CustomUserSerializer
 from users.models import CustomUser
 
@@ -34,7 +34,7 @@ class CourseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Course
-        fields = ('id', 'category', 'title', 'description', 'avatar', 'instructor', 'students', 'price')
+        fields = ('id', 'category', 'title', 'description', 'avatar', 'instructor', 'students')
 
     def create(self, validated_data):
         request = self.context.get('request')
@@ -62,7 +62,7 @@ class CourseDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Course
-        fields = ('id', 'category', 'title', 'description', 'avatar', 'instructor', 'students', 'price', 'created_time', 'updated_time')
+        fields = ('id', 'category', 'title', 'description', 'avatar', 'instructor', 'students', 'created_time', 'updated_time')
 
 
 class ModuleSerializer(serializers.ModelSerializer):
@@ -150,3 +150,25 @@ class SubmissionSerializer(serializers.ModelSerializer):
         
         return super().update(instance, validated_data)
         
+
+class EnrollSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Enrollment
+        fields = ('course', 'user', 'enroll_time')
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        user_to_enroll = validated_data['user']
+        course_pk = validated_data['course'].id
+        course = Course.objects.get(pk=course_pk)
+
+        if user.username != user_to_enroll.username:
+            raise PermissionDenied("You do not have permission to enroll.")
+
+        if Enrollment.objects.filter(user=user, course=course).exists():
+            raise ValidationError("You are already enrolled in this course.")
+        
+        course.students.add(user)
+
+        return super().create(validated_data)

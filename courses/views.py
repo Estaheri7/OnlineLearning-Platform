@@ -8,10 +8,10 @@ from .serializers import (
     CategorySerializer, CategoryDetailSerializer,
     CourseSerializer, CourseDetailSerializer,
     ModuleSerializer,
-    LessionSerializer, AssignmentSerializer, SubmissionSerializer
+    LessionSerializer, AssignmentSerializer, SubmissionSerializer, EnrollSerializer
 )
 from .models import (
-    Category, Course, Module, Lession, Assignment, Submission
+    Category, Course, Module, Lession, Assignment, Submission, Enrollment
 )
 
 
@@ -125,3 +125,20 @@ class SubmissionDetailView(generics.RetrieveUpdateAPIView):
     queryset = Submission.objects.all()
     serializer_class = SubmissionSerializer
     permission_classes = [IsAuthenticated]
+
+
+class EnrollListView(generics.ListCreateAPIView):
+    serializer_class = EnrollSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return Enrollment.objects.filter(user=user)
+    
+    def post(self, request, *args, **kwargs):
+        course_pk = request.data['course']
+        try:
+            course = Course.objects.get(pk=course_pk)
+            return super().post(request, *args, **kwargs)
+        except Course.DoesNotExist:
+            return Response({'detail': 'Course not found'}, status=status.HTTP_404_NOT_FOUND)
