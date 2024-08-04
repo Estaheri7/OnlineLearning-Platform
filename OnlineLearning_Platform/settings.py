@@ -156,3 +156,11 @@ SIMPLE_JWT = {
     'USER_ID_FIELD': 'id',
     'USER_ID_CLAIM': 'user_id',
 }
+
+# Email
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'sandbox.smtp.mailtrap.io'
+EMAIL_HOST_USER = 'your_mailtrap_username'
+EMAIL_HOST_PASSWORD = 'your_mailtrap_password'
+EMAIL_PORT = 'your_mailtrap_port'
