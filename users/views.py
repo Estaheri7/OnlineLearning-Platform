@@ -12,7 +12,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 
 
-from .serializers import CustomUserSerializer, UserProfileSerializer
+from .serializers import CustomUserSerializer, RegisterSerializer, UserProfileSerializer
 from .models import CustomUser, UserProfile
 
 
@@ -28,31 +28,12 @@ class RegisterView(APIView):
 
     def post(self, request):
         data = request.data
-        username = data['username']
-        email = data['email']
-        is_student = data.get('is_student', True)
-        password = data['password']
-
-        if not username or not email or not password:
-            return Response({"error": "All fields are required."}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = RegisterSerializer(data=data)
         
-        if CustomUser.objects.filter(username=username).exists():
-            return Response({"error": "Username already exists."}, status=status.HTTP_400_BAD_REQUEST)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
-        if CustomUser.objects.filter(email=email).exists():
-            return Response({"error": "Email already exists."}, status=status.HTTP_400_BAD_REQUEST)
-        
-        user = CustomUser(
-            username=username,
-            email=email,
-            is_student=is_student
-        )
-        user.set_password(password)
-        user.save()
-
-        profile = UserProfile(user=user)
-        profile.save()
-
+        serializer.save()
         return Response({'detail': 'Registered successfully!'})
 
 

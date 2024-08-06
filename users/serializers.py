@@ -28,6 +28,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         if password:
             user.set_password(password)
             user.save()
+            userprofile = UserProfile(user=user)
+            userprofile.save()
         return user
 
 
