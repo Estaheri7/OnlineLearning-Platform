@@ -36,13 +36,22 @@ class CategoryDetailView(generics.RetrieveUpdateAPIView):
 
 
 class CourseListView(generics.ListCreateAPIView):
-    queryset = Course.objects.all()
     permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return CourseSerializer
         return CourseDetailSerializer
+    
+    def get_queryset(self):
+        queryset = Course.objects.all()
+
+        category_pk = self.request.GET.get('category')
+
+        if category_pk:
+            return queryset.filter(category=category_pk)
+
+        return queryset
 
 
 class CourseDetailView(generics.RetrieveUpdateAPIView):
@@ -54,6 +63,18 @@ class CourseDetailView(generics.RetrieveUpdateAPIView):
             return CourseSerializer
         return CourseDetailSerializer
         
+
+class MyCourseListView(generics.ListAPIView):
+    serializer_class = CourseDetailSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        enrolled_courses = user.enrolled_courses.all()
+        instructed_courses = user.instructed_courses.all()
+        courses = enrolled_courses.union(instructed_courses)
+        return courses
+
 
 class ModuleListView(generics.ListCreateAPIView):
     serializer_class = ModuleSerializer

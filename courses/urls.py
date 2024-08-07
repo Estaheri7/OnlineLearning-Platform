@@ -4,7 +4,7 @@ from django.urls import path
 
 from .views import (
     CategoryListView, CategoryDetailView,
-    CourseListView,  CourseDetailView,
+    CourseListView,  CourseDetailView, MyCourseListView,
     ModuleListView, ModuleDetailView,
     LessionListView, LessionDetailView,
     AssignmentListView, AssignmentDetailView,
@@ -19,6 +19,7 @@ urlpatterns = [
 
     path('courses/', CourseListView.as_view(), name='course-list'),
     path('courses/<int:pk>/', CourseDetailView.as_view(), name='course-detail'),
+    path('my-courses/', MyCourseListView.as_view(), name='my-course-list'),
 
     path('modules/', ModuleListView.as_view(), name='module-for-course'),
     path('modules/<int:pk>/', ModuleDetailView.as_view(), name='moudle-detail'),
