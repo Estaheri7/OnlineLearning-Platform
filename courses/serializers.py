@@ -27,10 +27,6 @@ class CategoryDetailSerializer(serializers.ModelSerializer):
 
 
 class CourseSerializer(serializers.ModelSerializer):
-    category = serializers.PrimaryKeyRelatedField(
-        queryset=Category.objects.all(),
-        many=True
-    )
 
     class Meta:
         model = Course
