@@ -30,7 +30,7 @@ class CourseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Course
-        fields = ('id', 'category', 'title', 'description', 'avatar', 'instructor', 'students')
+        fields = ('id', 'category', 'title', 'description', 'avatar', 'price', 'instructor', 'students')
 
     def create(self, validated_data):
         request = self.context.get('request')
@@ -58,7 +58,7 @@ class CourseDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Course
-        fields = ('id', 'category', 'title', 'description', 'avatar', 'instructor', 'students', 'created_time', 'updated_time')
+        fields = ('id', 'category', 'title', 'description', 'avatar', 'price', 'instructor', 'students', 'created_time', 'updated_time')
 
 
 class ModuleSerializer(serializers.ModelSerializer):
