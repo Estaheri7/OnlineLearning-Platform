@@ -119,7 +119,6 @@ class AssignmentSerializer(serializers.ModelSerializer):
             raise PermissionDenied('You do not have permission to update this submission.')
         return super().update(instance, validated_data)
 
-    
 
 class SubmissionSerializer(serializers.ModelSerializer):
 
