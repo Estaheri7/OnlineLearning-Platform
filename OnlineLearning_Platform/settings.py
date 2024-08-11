@@ -167,3 +167,19 @@ EMAIL_HOST = 'sandbox.smtp.mailtrap.io'
 EMAIL_HOST_USER = 'your_mailtrap_username'
 EMAIL_HOST_PASSWORD = 'your_mailtrap_password'
 EMAIL_PORT = 'your_mailtrap_port'
+
+
+# ASGI
+
+ASGI_APPLICATION = 'OnlineLearning_Platform.asgi.application'
+
+# CHANNEL
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
