@@ -82,7 +82,7 @@ class Assignment(models.Model):
         verbose_name_plural = 'assignments'
 
 
-def get_upload_to_assignments(instance, filename):
+def get_upload_to_submissions(instance, filename):
     student = instance.student
     assignment = instance.assignment
     return os.path.join('assignments', str(student.id), str(assignment.id), 'submissions', filename)
@@ -91,7 +91,7 @@ def get_upload_to_assignments(instance, filename):
 class Submission(models.Model):
     student = models.ForeignKey('users.CustomUser', blank=True, null=True, related_name='submissions', on_delete=models.CASCADE)
     assignment = models.ForeignKey(Assignment, blank=False, null=False, on_delete=models.CASCADE)
-    content = models.FileField(blank=True, null=True, upload_to=get_upload_to_assignments)
+    content = models.FileField(blank=True, null=True, upload_to=get_upload_to_submissions)
     submitted_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

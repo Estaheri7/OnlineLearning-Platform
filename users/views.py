@@ -55,10 +55,10 @@ class LoginView(APIView):
         code = random.randint(10000, 99999)
         cache.set(str(username), code)
 
-        try:
-            send_verification_code(email, code)
-        except Exception:
-            return Response({'error': 'Something went wrong'})
+        # try:
+        #     send_verification_code(email, code)
+        # except Exception:
+        #     return Response({'error': 'Something went wrong'})
 
         return Response({'detail': f'Code sent to {email}',
                          'code': code})
