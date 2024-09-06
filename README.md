@@ -1,6 +1,6 @@
 # Online Learning Platform
 
-This project is an online learning platform built using Django and Django REST Framework. The platform allows users to register, enroll in courses, access course modules, lessons, assignments, and track submissions. It also includes a payment system for course transactions and a real-time chat feature powered by WebSockets using Django Channels and Redis.
+This project is an online learning platform built using Django and Django REST Framework. The platform allows users to register, enroll in courses, access course modules, lessons, assignments, and track submissions. It also includes a dummy payment system for course transactions and a real-time chat feature powered by WebSockets using Django Channels and Redis.
 
 ## Features
 
